@@ -7,6 +7,7 @@ function block2tensors(blk::MatrixBlock{2})
 end
 
 # swap gate is full ranked
+@show mat(SWAP)
 block2tensors(SWAP)
 # cnot gate is not full ranked
 block2tensors(CNOT)
