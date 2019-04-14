@@ -2,6 +2,10 @@ include("GeneralTensorNetwork.jl")
 include("random_graphs.jl")
 using Test
 
+function line_graph(gtn::GeneralTensorNetwork)
+    Ne = ne(gtn)
+end
+
 @testset "contract" begin
     g = demo_gtn()
     for i=9:-1:1

@@ -4,16 +4,13 @@ using LightGraphs
 import LightGraphs: rem_edge!, rem_vertex!, nv, ne, vertices, edges, is_directed, neighbors
 using StatsBase
 using TensorOperations, TupleTools
-using PyCall
-@pyimport numpy
 
-asarray(x::Number) = fill(x, ())
-asarray(x::AbstractArray) = x
+#include("eincode.jl")
 
 # if allowing star like bond, the graph is not simple
 # also, a tensor network can be a multi-graph, it can not be avoided in the contraction process
 # note: not all legs form bonds
-# note: dangling bond means trace
+# note: single site bond means trace
 # note: with star contraction, the relation between elimination ordering and contraction ordering still holds
 # note: general graph means the equivalence between edges and vertices
 
@@ -184,7 +181,7 @@ function contract(gtn::GeneralTensorNetwork, ie::Int)
         IVS[i] = _code
     end
 
-    new_tensor = numpy.einsum((i%2==1 ? gtn.tensors[vs[(i+1)÷2]] : Tuple(IVS[(i+1)÷2]) for i=1:2*length(IVS))..., union(IC, ID)|>Tuple) |> asarray
+    new_tensor = eincontract((i%2==1 ? gtn.tensors[vs[(i+1)÷2]] : Tuple(IVS[(i+1)÷2]) for i=1:2*length(IVS))..., union(IC, ID)|>Tuple)
     NIC = Tuple(i > ie ? i-1 : i for i in IC)
     gtn |> rem_edge(ie) |> rem_vertex(vs) |> add_vertex(new_tensor, NIC)
     #gtn |> add_vertex(new_tensor, IC) |> rem_edge(ie) |> rem_vertex(vs)
