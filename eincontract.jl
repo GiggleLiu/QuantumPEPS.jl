@@ -73,50 +73,55 @@ function treecontract(tree::Tuple, args...)
     _treecontract(tree, args[end], args...) |> first
 end
 
-#eincontract(::EinCode, )
+nograd(f, args...) = f(args...)
+@adjoint nograd(f, args...) = f(args...), _ -> nothing
+@adjoint optimaltree(args...) = optimaltree(args...), _ -> nothing
+@adjoint _args2network(args...) = _args2network(args...), _ -> nothing
 
-struct EinCode{TYPE, TOPO, CODE}
+#=
+macro nograd(expr)
+    adjexpr = :(@adjoint optimaltree(args...) = optimaltree(args...), _ -> nothing
+    ex = :(expr; )
 end
+=#
 
-macro EinCode_str(s)
-    TYPE, TOPO, CODE = ein_decode(s)
-    :(EinCode{$TYPE, $TOPO, $CODE})
-end
-
-function EinCode(s::String)
-    TYPE, TOPO, CODE = ein_decode(s)
-    EinCode{TYPE, TOPO, CODE}()
-end
-
-EinCode(TYPE, TOPO, CODE) = EinCode{TYPE, TOPO, CODE}()
-function EinCode(CODE)
-    topo = ein_code2topo(CODE)
-    EinCode{TYPE, topo, ein_topo2type(topo)}()
-end
-
-function ein_str2code()
-end
-
-function ein_code2topo()
-end
-
-function ein_topo2type(topocode::Tuple)
-end
-
-"""
-a einsum code is a contract graph.
-"""
-function is_contract(code::Tuple)
-    all_indices = TupleTools.vcat(code...)
-    counts = Dict{Int, Int}()
-    for ind in all_indices
-        counts[ind] = get(counts, ind, 0) + 1
+function _args2network(args, nt)
+    network = Vector{Vector{Int}}(undef, nt)
+    for i = 1:nt
+        network[i] = [args[2i]...]
     end
-    all(isequal(2), counts |> values)
+    network
 end
 
-function is_decomposible(code::NTuple{N}) where N
-    intersect(TupleTools.deleteat(code, N)...) |> isempty
-end
+@generated function optcontract(args...)
+    na = length(args)
+    nt = na÷2
+    na%2 == 0 && throw(ArgumentError("number of arguments must be odd, output indices must be specified."))
+    for i = 1:na-1
+        if i%2 == 0
+            args[i] <: NTuple{<:Any, <:Integer} || throw(ArgumentError("$i-th argument should be a tuple."))
+        else
+            args[i] <: AbstractArray || throw(ArgumentError("$i-th argument type should be an array."))
+        end
+    end
 
-ein_decode(s::String) = 1,2,3
+    quote
+        network = _args2network(args, $nt)
+        # size check
+        size_dict = Dict{Int, Int}()
+        @inbounds for i = 1:$nt
+            legs = network[i]
+            ts = args[2i-1]
+            for (N, leg) in zip(size(ts), legs)
+                if haskey(size_dict, leg)
+                    size_dict[leg] == N || throw(DimensionMismatch("size of contraction leg $leg not match."))
+                else
+                    size_dict[leg] = N
+                end
+            end
+        end
+        tree, cost = optimaltree(network, size_dict)
+        @show tree, cost
+        treecontract(tree, args...)
+    end
+end

@@ -1,4 +1,4 @@
-include("eincode.jl")
+include("eincontract.jl")
 
 
 ############### Test Code ###################
@@ -26,4 +26,12 @@ end
 
     @test mytest(f2, a)
     @test mytest(a->treecontract(((1,2),3), a, (1,2), a, (2,3), a, (3, 1), ())[] |> real, a)
+end
+
+@testset "optcontract" begin
+    a = randn(ComplexF64, 3,3)
+    @test optcontract(a, (1,2), a, (2,3), (1,3)) ≈ a*a
+    @test mytest(a->eincontract(a, (1,2), a, (2,1), ()) |> sum |> real, a)
+    @test mytest(a->optcontract(a, (1,2), a, (2,3), (1,3)) |> sum |> real, a)
+    @test mytest(a->optcontract(a, (1,2), a, (2,3), a, (3,4), (4,1)) |> sum |> real, a)
 end

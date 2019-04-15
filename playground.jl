@@ -140,3 +140,12 @@ ngradient(gg, a)
 gradient(gg, a)
 @test Zygote.gradient(gg, a)[1] ≈ 2a
 Zygote.gradient(h, a)[1]
+
+using Zygote
+struct A
+    data::Float64
+end
+Base.:*(a::A, b::A) = A(a.data+b.data)
+
+gradient(x->(A(x)*A(x)).data, 0.2)
+gradient(x->([A(x)].*[A(x)])[].data, 0.2)
