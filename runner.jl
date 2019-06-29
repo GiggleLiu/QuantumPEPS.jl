@@ -1,15 +1,16 @@
+using CUDAnative: device!, CuDevice
+HAS_CUDA && device!(CuDevice(4))
+
 using Fire
 using Yao, Yao.ConstGate, BitBasis
 using CuYao
 using YaoArrayRegister: u1rows!, mulrow!
 using QuantumPEPS
-using CUDAnative: device!, CuDevice
 using CuArrays
 using Flux
 using BenchmarkTools
 using DelimitedFiles, JLD2, FileIO, Pkg
 CuArrays.allowscalar(false)
-HAS_CUDA && device!(CuDevice(3))
 
 function save_training(filename, qopt, loss::Vector, params::Vector)
     save(filename, "qopt", qopt, "loss", loss, "params", params)
@@ -20,8 +21,8 @@ function load_training(filename)
     res["qopt"], res["loss"], res["params"]
 end
 
-@main function j1j2(nx=4, ny=4)
-    nv = 2
+@main function j1j2(nx::Int=4, ny::Int=4)
+    nv = 1
     depth = 2
     model = J1J2(nx, ny; J2=0.5, periodic=false)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
