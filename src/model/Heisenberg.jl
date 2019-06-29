@@ -36,10 +36,10 @@ end
 Ground state energy by sampling Quantum circuit.
 The hamiltonian is limited to Heisenberg and J1J2 Type.
 """
-function energy(qpeps::QPEPSMachine, model::AbstractHeisenberg; nbatch=1024)
+function energy(qpeps::QPEPSMachine, model::AbstractHeisenberg)
     local eng = 0.0
     for basis in [X, Y, Z]
-        mres = gensample(qpeps, Z; nbatch=nbatch)
+        mres = gensample(qpeps, basis)
         for (i,j,w) in get_bonds(model)
             eng += w*(1-2*mean(mres[i] .⊻ mres[j]))
         end

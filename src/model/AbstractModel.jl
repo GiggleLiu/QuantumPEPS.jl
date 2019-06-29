@@ -25,7 +25,8 @@ function ground_state(model::AbstractModel)
     # get the ground state
     hami = hamiltonian(model)
     E, v = eigsolve(mat(hami), 1, :SR)
-    register(v[1])
+    println("EG = $(E[1])")
+    ArrayReg(v[1])
 end
 
 """

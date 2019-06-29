@@ -18,12 +18,13 @@ end
 struct QPEPSMachine
     config::QPEPSConfig
     runtime::QPEPSRunTime
+    reg0::AbstractRegister
 end
 
-function QPEPSMachine(config::QPEPSConfig)
+function QPEPSMachine(config::QPEPSConfig, reg0::AbstractRegister)
     c = get_circuit(config)
     rt = QPEPSRunTime(c, collect_blocks(RotationGate, c), collect_blocks(Bag, c), collect_blocks(Measure, c))
-    QPEPSMachine(config, rt)
+    QPEPSMachine(config, rt, reg0)
 end
 
 struct MeasureResult
@@ -43,13 +44,12 @@ Base.size(m::MeasureResult,i::Int) = i==1 ? m.nx : m.nm
 """
 generate samples
 """
-function gensample(qpeps::QPEPSMachine, basis; nbatch=1024)
+function gensample(qpeps::QPEPSMachine, basis)
     c, rt = qpeps.config, qpeps.runtime
     nx = c.nrepeat+c.nv
     chbasis!(rt, basis)
-    reg = zero_state(nqubits(rt.circuit); nbatch=nbatch)
-    reg |> rt.circuit
-    res = zeros(Int, nbatch, nx)
+    copy(qpeps.reg0) |> rt.circuit
+    res = zeros(Int, nbatch(qpeps.reg0), nx)
 
     for j=1:nx
         res[:,j] = rt.mblocks[j].results

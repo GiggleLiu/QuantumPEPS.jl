@@ -1,21 +1,24 @@
 export energy, train
 
-function train(config, model; maxiter=200, α=0.1, nbatch=1024)
+function train(config, model; maxiter=200, α=0.1, nbatch=1024, use_cuda=false)
     @assert nspins(config) == nspins(model)
     @assert config.nv+config.nrepeat == model.size[1]
-    qpeps = QPEPSMachine(config)
+    reg0 = zero_state(nqubits(config); nbatch=nbatch)
+    use_cuda && (reg0 = reg0 |> cu)
+    qpeps = QPEPSMachine(config, reg0)
     dispatch!(qpeps.runtime.circuit, :random)
+    println("E0 = $(energy(qpeps, model))")
     for i in 1:maxiter
         for r in qpeps.runtime.rotblocks
             r.theta += π/2
-            E₊ = energy(qpeps, model; nbatch=nbatch)
+            E₊ = energy(qpeps, model)
             r.theta -= π
-            E₋ = energy(qpeps, model; nbatch=nbatch)
+            E₋ = energy(qpeps, model)
             r.theta += π/2
             g = 0.5(E₊ - E₋)
             r.theta -= g*α
         end
-        println("Iter $i, E/N = $(energy(qpeps, model, nbatch=nbatch)/nspins(model))")
+        println("Iter $i, E = $(energy(qpeps, model))")
     end
     qpeps
 end

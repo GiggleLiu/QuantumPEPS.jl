@@ -90,11 +90,11 @@ function get_circuit(c::QPEPSConfig)
         for ibit=1:c.nm
             chain(nbit, pswap(nbit,mbit(c,ibit),vbit(c,ibit,iv)) for iv=1:c.nv) |> add!
         end
-        # interact neghboring physical qubits
-        chain(nbit, pswap(nbit,mbit(c,ibit),mbit(c,ibit+1)) for ibit=1:c.nm-1) |> add!
         # interact neghboring virtual qubits
-        for ibit=1:c.nm-1
-            chain(nbit, pswap(nbit,vbit(c,ibit,iv),vbit(c,ibit+1,iv)) for iv=1:c.nv) |> add!
+        for ibit=1:c.nm
+            # interact neghboring physical qubits
+            chain(nbit, pswap(nbit,mbit(c,ibit),mbit(c,ibit%c.nm+1)) for ibit=1:c.nm-1) |> add!
+            chain(nbit, pswap(nbit,vbit(c,ibit,iv),vbit(c,ibit%c.nm+1,iv)) for iv=1:c.nv) |> add!
         end
         # measure physical qubits
         locs = (mbit(c)...,)
