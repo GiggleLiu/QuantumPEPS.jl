@@ -32,7 +32,9 @@ asarray(x::Number) = fill(x, ())
 asarray(x::AbstractArray) = x
 
 function eincontract(args...)
-    length(args) % 2 == 0 && throw(ArgumentError("Number of arguments should be odd!"))
+    if !(args[1] isa String) && is_contract((args[2:2:end]..., args[end]))
+        return tensorcontract(args...)
+    end
     try
         numpy.einsum(args...) |> asarray
     catch
@@ -60,7 +62,7 @@ function _treecontract(tree::Int, IC, args...)
     eincontract(C, IC0, IC)
 end
 
-function _treecontract(tree::Tuple, IC, args...)
+function _treecontract(tree::Union{Tuple, Vector}, IC, args...)
     i,j = tree
     A, IA = _treecontract(i, nothing, args...)
     B, IB = _treecontract(j, nothing, args...)
@@ -68,7 +70,7 @@ function _treecontract(tree::Tuple, IC, args...)
     eincontract(A, IA, B, IB, _IC), _IC
 end
 
-function treecontract(tree::Tuple, args...)
+function treecontract(tree::Union{Tuple, Vector}, args...)
     length(args) % 2 == 0 && throw(ArgumentError("Number of arguments should be odd!"))
     _treecontract(tree, args[end], args...) |> first
 end
@@ -76,7 +78,6 @@ end
 nograd(f, args...) = f(args...)
 @adjoint nograd(f, args...) = f(args...), _ -> nothing
 @adjoint optimaltree(args...) = optimaltree(args...), _ -> nothing
-@adjoint _args2network(args...) = _args2network(args...), _ -> nothing
 
 #=
 macro nograd(expr)
@@ -92,6 +93,8 @@ function _args2network(args, nt)
     end
     network
 end
+
+@adjoint _args2network(args...) = _args2network(args...), _ -> nothing
 
 @generated function optcontract(args...)
     na = length(args)
@@ -120,6 +123,7 @@ end
                 end
             end
         end
+        print("finding optimal tree ...")
         tree, cost = optimaltree(network, size_dict)
         @show tree, cost
         treecontract(tree, args...)
