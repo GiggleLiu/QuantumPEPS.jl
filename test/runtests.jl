@@ -1,5 +1,50 @@
 using Test, QuantumPEPS, Yao
-using LinearAlgebra
+using LinearAlgebra, Random
+
+@testset "pswap gate" begin
+    pb = pswap(6, 2, 4)
+    reg = rand_state(6)
+    @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg, PutBlock}, copy(reg), pb)
+    @test copy(reg) |> pb ≈ reg
+
+    dispatch!(pb, π)
+    @test copy(reg) |> pb ≈ -im*(copy(reg) |> swap(6, 2, 4))
+    @test copy(reg) |> pb |> isnormalized
+
+    dispatch!(pb, :random)
+    @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg, PutBlock}, copy(reg), pb)
+end
+
+@testset "bag" begin
+    bag = Bag(X)
+    reg = zero_state(1)
+    @test reg |> bag ≈ ArrayReg([0im, 1.0])
+    @test mat(bag) == mat(X)
+    @test isreflexive(bag)
+    @test ishermitian(bag)
+    @test isunitary(bag)
+
+    setcontent!(bag, Z)
+    print(bag)
+    @test reg |> bag ≈ ArrayReg([0im, -1.0])
+    @test mat(bag) == mat(Z)
+end
+
+@testset "basis rotor" begin
+    mblock = Measure(1)
+
+    reg = repeat(ArrayReg([0im,1]/sqrt(2)), 10)
+    reg |> basis_rotor(Z) |> mblock
+    @test mblock.results ≈ fill(1,10)
+
+    reg = repeat(ArrayReg([1+0im,1]/sqrt(2)), 10)
+    reg |> basis_rotor(X) |> mblock
+    @test mblock.results ≈ fill(0,10)
+
+    reg = repeat(ArrayReg([im,1.0]/sqrt(2)), 10)
+    reg |> basis_rotor(Y) |> mblock
+    @test mblock.results ≈ fill(1,10)
+end
 
 @testset "QPEPSConfig" begin
     c = QPEPSConfig(4, 2, 4, 1)
@@ -10,6 +55,7 @@ using LinearAlgebra
     @test nspins(c) == 4*4+8
     @test nparameters(get_circuit(c)) == 4*17
     @test collect_blocks(Measure, get_circuit(c))|>length == 6
+    @test collect_blocks(HGate, get_circuit(c))|>length == 12
 end
 
 @testset "measure" begin
@@ -28,6 +74,30 @@ end
     @test mr[CartesianIndex(3, 1)] == [1, 0]
     @test mr[3] == [1, 0]
     @test mr[10] == [0, 0]
+end
+
+@testset "qpeps machine" begin
+    Random.seed!(3)
+    c = QPEPSConfig(4, 2, 4, 1)
+    qpeps = QPEPSMachine(c)
+    rt = qpeps.runtime
+    @test length(rt.rotblocks) == 4*17
+    @test length(rt.mblocks) == 6
+    @test length(rt.mbasis) == 6
+
+    @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 6
+    chbasis!(qpeps.runtime, Y)
+    @test collect_blocks(RotationGate{<:Any,<:Any,<:XGate}, qpeps.runtime.circuit) |> length == 6
+    @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 0
+
+    model = J1J2(6, 4; J2=0.5, periodic=false)
+    @test nspins(qpeps.config) == nspins(model)
+    mres = gensample(qpeps, Z; nbatch=100)
+    @test mres.nbatch == 100
+    @test mres.nx == model.size[1]
+    @test mres.nm == model.size[2]
+    @test isapprox(energy(qpeps, model, nbatch=100), -0.75*12, atol=0.1)
+    @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 6
 end
 
 @testset "j1j2" begin

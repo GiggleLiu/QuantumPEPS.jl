@@ -37,4 +37,3 @@ function get_bonds end
 
 include("Heisenberg.jl")
 include("J1J2.jl")
-include("TFI.jl")
