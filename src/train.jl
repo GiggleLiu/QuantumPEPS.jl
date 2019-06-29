@@ -11,6 +11,7 @@ function train(config, model; maxiter=200, optimizer=Optimise.ADAM(0.1), nbatch=
     rotblocks = qpeps.runtime.rotblocks
     dispatch!(circuit, :random)
     println("E0 = $(energy(qpeps, model))")
+    flush(stdout)
 
     history = Float64[]
     params = parameters(circuit)
@@ -28,6 +29,7 @@ function train(config, model; maxiter=200, optimizer=Optimise.ADAM(0.1), nbatch=
         dispatch!.(rotblocks, params)
         push!(history, energy(qpeps, model))
         println("Iter $i, E = $(history[end])")
+        flush(stdout)
     end
     qpeps, history
 end
