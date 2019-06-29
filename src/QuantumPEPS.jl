@@ -4,6 +4,7 @@ using Statistics
 using Yao.ConstGate
 using KrylovKit: eigsolve
 using Requires
+using Flux
 
 include("circuit.jl")
 include("sampler.jl")
