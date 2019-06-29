@@ -86,15 +86,15 @@ function get_circuit(c::QPEPSConfig)
                 chain(nbit, singlet_block(nbit, vbit(c,ibit,iv), vbit(c,ibit+1,iv)) for ibit=1:2:c.nm) |> add!
             end
         end
-        # for each physical qubit, interact with its own bath.
-        for ibit=1:c.nm
-            chain(nbit, pswap(nbit,mbit(c,ibit),vbit(c,ibit,iv)) for iv=1:c.nv) |> add!
-        end
-        # interact neghboring virtual qubits
-        for ibit=1:c.nm
-            # interact neghboring physical qubits
-            chain(nbit, pswap(nbit,mbit(c,ibit),mbit(c,ibit%c.nm+1)) for ibit=1:c.nm-1) |> add!
-            chain(nbit, pswap(nbit,vbit(c,ibit,iv),vbit(c,ibit%c.nm+1,iv)) for iv=1:c.nv) |> add!
+        for ir=1:c.nrepeat
+            for ibit=1:c.nm
+                # for each physical qubit, interact with its own bath.
+                chain(nbit, pswap(nbit,mbit(c,ibit),vbit(c,ibit,iv)) for iv=1:c.nv) |> add!
+                # interact neghboring physical qubits
+                pswap(nbit,mbit(c,ibit),mbit(c,ibit%c.nm+1)) |> add!
+                # interact neghboring virtual qubits
+                chain(nbit, pswap(nbit,vbit(c,ibit,iv),vbit(c,ibit%c.nm+1,iv)) for iv=1:c.nv) |> add!
+            end
         end
         # measure physical qubits
         locs = (mbit(c)...,)
