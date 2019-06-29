@@ -1,18 +1,18 @@
 export AbstractModel, Heisenberg
-export heisenberg_ij, hamiltonian, heisenberg_term, ground_state, energy, energy_exact, get_bonds, energy, heisenberg_2d, nspin
+export heisenberg_ij, hamiltonian, heisenberg_term, ground_state, energy, energy_exact, get_bonds, energy, heisenberg_2d, nspins
 
 abstract type AbstractModel{D} end
 abstract type AbstractHeisenberg{D} <: AbstractModel{D} end
 
-nspin(model::AbstractModel) = prod(size(model))
+nspins(model::AbstractModel) = prod(size(model))
 
 """
-    energy_exact(tc::QuantumMPS, model::AbstractModel) -> Float64
+    energy_exact(tc, model::AbstractModel) -> Float64
 
 Exact ground state energy.
 """
-function energy_exact(tc::QuantumMPS, model::AbstractModel)
-    nbit = nbit_simulated(tc)
+function energy_exact(tc, model::AbstractModel)
+    nbit = nspins(tc)
     expect(hamiltonian(model), state_exact(tc)) |> real
 end
 

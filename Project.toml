@@ -1,0 +1,18 @@
+name = "QuantumPEPS"
+uuid = "72caed22-9a17-11e9-1079-d5f6f8824925"
+authors = ["JinGuo Liu"]
+version = "0.1.0"
+
+[deps]
+BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

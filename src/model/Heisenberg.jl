@@ -31,20 +31,18 @@ function get_bonds(model::AbstractModel{1})
 end
 
 """
-    energy(chem::QuantumMPS, model::AbstractHeisenberg) -> Float64
+    energy(config, model::AbstractHeisenberg; nbatch) -> Float64
 
-Ground state energy by sampling Quantum MPS.
+Ground state energy by sampling Quantum circuit.
 The hamiltonian is limited to Heisenberg and J1J2 Type.
 """
-function energy(chem::QuantumMPS, model::AbstractHeisenberg)
-    energy(chem, X, model) + energy(chem, Y, model) + energy(chem, Z, model)
-end
-
-function energy(chem::QuantumMPS, pauli::PauliGate, model::AbstractHeisenberg)
-    res = gensample(chem, pauli)
-    local eng = 0.0
-    for bond in get_bonds(model)
-        eng += bond[3]*mean(res[:,bond[1]].*res[:,bond[2]])
+function energy(c::QPEPSConfig, model::AbstractHeisenberg; nbatch=1024)
+    for basis in [X, Y, Z]
+        mres = gensample(circuit, rt, Z; nbatch=nbatch)
+        local eng = 0.0
+        for (i,j,w) in get_bonds(model)
+            eng += w*mean(mres[i] .* mres[j])
+        end
     end
-    eng/4
+    eng/=4
 end
