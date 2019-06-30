@@ -1,25 +1,17 @@
 using CUDAnative: device!, CuDevice
-HAS_CUDA && device!(CuDevice(4))
+device!(CuDevice(4))
+using CuArrays
+CuArrays.allowscalar(false)
 
 using Fire
 using Yao, Yao.ConstGate, BitBasis
 using CuYao
 using YaoArrayRegister: u1rows!, mulrow!
 using QuantumPEPS
-using CuArrays
 using Flux
 using BenchmarkTools
-using DelimitedFiles, JLD2, FileIO, Pkg
-CuArrays.allowscalar(false)
 
-function save_training(filename, qopt, loss::Vector, params::Vector)
-    save(filename, "qopt", qopt, "loss", loss, "params", params)
-end
-
-function load_training(filename)
-    res = load(filename)
-    res["qopt"], res["loss"], res["params"]
-end
+include("data/decoder.jl")
 
 @main function j1j2(nx::Int=4, ny::Int=4)
     nv = 1

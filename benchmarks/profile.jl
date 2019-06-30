@@ -1,5 +1,5 @@
 using CUDAnative: device!, CuDevice
-device!(CuDevice(3))
+device!(CuDevice(5))
 using CuArrays
 CuArrays.allowscalar(false)
 
@@ -9,8 +9,11 @@ using CuYao
 using YaoArrayRegister: u1rows!, mulrow!
 using QuantumPEPS
 using BenchmarkTools
+using Profile
 
-function run_benchmark(nx=6, ny=4; usecuda, nv=2, depth=1)
+function run_profile(nx=6, ny=6; usecuda)
+    nv = 1
+    depth = 2
     model = J1J2(nx, ny; J2=0.5, periodic=false)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
 
@@ -18,12 +21,15 @@ function run_benchmark(nx=6, ny=4; usecuda, nv=2, depth=1)
     usecuda && (reg0 = reg0 |> cu)
     qpeps = QPEPSMachine(config, reg0)
     dispatch!(qpeps.runtime.circuit, :random)
-    display(@benchmark energy($qpeps, $model))
+    energy(qpeps, model)
+    @show nparameters(qpeps.runtime.circuit)
+
+    Profile.init(delay=0.001)
+    @profile energy(qpeps, model)
+    display(Profile.print(mincount=10))
 end
 
-#run_benchmark(;usecuda=false)
-#run_benchmark(;usecuda=true)
-run_benchmark(6, 6; usecuda=true, nv=1, depth=2)
+run_profile(6, 6; usecuda=true)
 
 # REPORT
 # Titan-V: 640ms

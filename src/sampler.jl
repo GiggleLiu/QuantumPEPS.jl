@@ -27,15 +27,15 @@ function QPEPSMachine(config::QPEPSConfig, reg0::AbstractRegister)
     QPEPSMachine(config, rt, reg0)
 end
 
-struct MeasureResult
+struct MeasureResult{AT<:AbstractMatrix}
     nm::Int
     nbatch::Int
     nx::Int
-    data::Array{Int,2}
+    data::AT
 end
-MeasureResult(nm::Int, data::Array{Int, 2}) = MeasureResult(nm, size(data)..., data)
+MeasureResult(nm::Int, data::AbstractMatrix) = MeasureResult(nm, size(data)..., data)
 
-Base.getindex(m::MeasureResult, i::Int,j::Int) = readbit.(m.data[:,i], j)
+Base.getindex(m::MeasureResult, i::Int,j::Int) = readbit.(view(m.data,:,i), j)
 Base.getindex(m::MeasureResult, ij) = getindex(m, (ij-1)%m.nx+1, (ij-1)÷m.nx+1)
 Base.getindex(m::MeasureResult, ci::CartesianIndex) = getindex(m, ci.I...)
 Base.size(m::MeasureResult) = (m.nx, m.nm)
@@ -52,7 +52,7 @@ function gensample(qpeps::QPEPSMachine, basis)
     res = zeros(Int, nbatch(qpeps.reg0), nx)
 
     for j=1:nx
-        res[:,j] = rt.mblocks[j].results
+        res[:,j] = Vector(rt.mblocks[j].results)
     end
     return MeasureResult(c.nm, res)
 end
