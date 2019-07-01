@@ -86,7 +86,7 @@ function get_circuit(c::QPEPSConfig)
                 chain(nbit, singlet_block(nbit, vbit(c,ibit,iv), vbit(c,ibit+1,iv)) for ibit=1:2:c.nm) |> add!
             end
         end
-        for ir=1:c.nrepeat
+        for ir=1:c.depth
             for ibit=1:c.nm
                 # for each physical qubit, interact with its own bath.
                 chain(nbit, pswap(nbit,mbit(c,ibit),vbit(c,ibit,iv)) for iv=1:c.nv) |> add!
