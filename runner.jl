@@ -15,7 +15,7 @@ include("data/decoder.jl")
 
 @main function j1j2(nx::Int=4, ny::Int=4)
     nv = 1
-    depth = 2
+    depth = 3
     model = J1J2(nx, ny; J2=0.5, periodic=false)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
     optimizer = Flux.Optimise.ADAM(0.1)

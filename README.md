@@ -6,13 +6,19 @@
 
 Type `]` in a Julia REPL to enter the `pkg` mode, then type
 ```julia pkg
-pkg> add <github repo>#master
+pkg> dev git@github.com:GiggleLiu/QuantumPEPS.jl.git
+pkg> add Fire FileIO
 ```
 
 ## To Run
+To run the tests
+```bash
+$ julia --project test/runtests.jl  # run the tests
+```
+
 To run a toy example of j1j2 model of size 4 x 4, type
 ```bash
-$ julia runner.jl j1j2 4 4
+$ julia --project runner.jl j1j2 4 4
 ```
 
 ## To Cite

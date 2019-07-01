@@ -1,4 +1,4 @@
-using DelimitedFiles, JLD2, FileIO, Pkg
+using DelimitedFiles, FileIO
 
 function save_training(filename, qopt, loss::Vector, params::Vector)
     save(filename, "qopt", qopt, "loss", loss, "params", params)
