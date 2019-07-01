@@ -23,7 +23,7 @@ include("data/decoder.jl")
     model = J1J2(nx, ny; J2=0.5, periodic=false)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
     optimizer = Flux.Optimise.ADAM(0.1)
-    qpeps, history = train(config, model; maxiter=200, nbatch=1024, optimizer=optimizer)
+    qpeps, history = train(config, model; maxiter=200, nbatch=1024, optimizer=optimizer, use_cuda=USE_CUDA)
     params = parameters(qpeps.runtime.circuit)
     save_training("data/j1j2-nx$nx-ny$ny-nv$nv-d$depth.jld2", optimizer, history, params)
 end
