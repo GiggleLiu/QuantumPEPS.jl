@@ -1,12 +1,16 @@
-using CUDAnative: device!, CuDevice
-device!(CuDevice(4))
-using CuArrays
-CuArrays.allowscalar(false)
+# please swith it off if you do not use CUDA
+const USE_CUDA = true
+
+if USE_CUDA
+    using CUDAnative: device!, CuDevice
+    device!(CuDevice(4))
+    using CuArrays
+    CuArrays.allowscalar(false)
+    using CuYao
+end
 
 using Fire
 using Yao, Yao.ConstGate, BitBasis
-using CuYao
-using YaoArrayRegister: u1rows!, mulrow!
 using QuantumPEPS
 using Flux
 using BenchmarkTools
