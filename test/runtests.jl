@@ -53,7 +53,7 @@ end
     @test vbit(c, 4) == 11:12
     @test vbit(c, 3, 2) == 10
     @test nspins(c) == 4*4+8
-    @test nparameters(get_circuit(c)) == 4*17
+    @test nparameters(get_circuit(c)) == 4*20
     @test collect_blocks(Measure, get_circuit(c))|>length == 6
     @test collect_blocks(HGate, get_circuit(c))|>length == 12
 end
@@ -79,9 +79,9 @@ end
 @testset "qpeps machine" begin
     Random.seed!(3)
     c = QPEPSConfig(4, 2, 4, 1)
-    qpeps = QPEPSMachine(c)
+    qpeps = QPEPSMachine(c, zero_state(12; nbatch=100))
     rt = qpeps.runtime
-    @test length(rt.rotblocks) == 4*17
+    @test length(rt.rotblocks) == 4*20
     @test length(rt.mblocks) == 6
     @test length(rt.mbasis) == 6
 
@@ -92,11 +92,11 @@ end
 
     model = J1J2(6, 4; J2=0.5, periodic=false)
     @test nspins(qpeps.config) == nspins(model)
-    mres = gensample(qpeps, Z; nbatch=100)
+    mres = gensample(qpeps, Z)
     @test mres.nbatch == 100
     @test mres.nx == model.size[1]
     @test mres.nm == model.size[2]
-    @test isapprox(energy(qpeps, model, nbatch=100), -0.75*12, atol=0.1)
+    @test isapprox(energy(qpeps, model), -0.75*12, atol=0.1)
     @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 6
 end
 
@@ -122,5 +122,5 @@ end
     model = J1J2(2, 4; J2=0.5, periodic=false)
     h = hamiltonian(model)
     EG = eigen(mat(h) |> Matrix).values[1]
-    @show EG/nspins(model)
+    @test EG/nspins(model) ≈ -0.45522873432070216
 end

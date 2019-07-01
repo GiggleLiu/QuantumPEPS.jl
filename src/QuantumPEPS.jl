@@ -6,6 +6,7 @@ using KrylovKit: eigsolve
 using Requires
 using Flux
 
+include("YaoPatch.jl")
 include("circuit.jl")
 include("sampler.jl")
 include("model/AbstractModel.jl")
