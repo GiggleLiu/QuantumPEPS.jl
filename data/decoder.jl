@@ -18,4 +18,4 @@ function decode(nx::Int, ny::Int)
     writedlm("$suff-loss.dat", res["loss"])
 end
 
-decode(6, 6)
+#decode(6, 6)
