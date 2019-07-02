@@ -14,11 +14,6 @@ end
 
 Base.size(model::J1J2) = model.size
 
-function hamiltonian(model::J1J2)
-    nbit = nspins(model)
-    sum(x->x[3]*heisenberg_ij(nbit, x[1], x[2]), get_bonds(model))*0.25
-end
-
 @inline function get_site(ij, mn, pbc::Val{true})
     Tuple(mod(i-1,m)+1 for (i,m) in zip(ij, mn))
 end

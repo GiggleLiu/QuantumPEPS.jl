@@ -9,7 +9,7 @@ function load_training(filename)
     #res["qopt"], res["loss"], res["params"]
 end
 
-function decode(nx::Int, ny::Int)
+function decode(nx::Int, ny::Int, d::Int=5)
     nv = 1
     depth = 2
     suff = "j1j2-nx$nx-ny$ny-nv$nv-d$depth"
@@ -18,4 +18,4 @@ function decode(nx::Int, ny::Int)
     writedlm("$suff-loss.dat", res["loss"])
 end
 
-#decode(6, 6)
+decode(4, 4)
