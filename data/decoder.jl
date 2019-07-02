@@ -17,4 +17,4 @@ function decode(nx::Int, ny::Int, depth::Int=5)
     writedlm("$suff-loss.dat", res["loss"])
 end
 
-decode(4, 4)
+#decode(4, 4)
