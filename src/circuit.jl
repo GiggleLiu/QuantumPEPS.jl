@@ -87,6 +87,10 @@ function get_circuit(c::QMPSConfig)
         else
             swap(nbit, 1, nbit) |> add!
         end
+        if i==1
+            # create singlets if it is the initial repeatition.
+            chain(nbit, singlet_block(nbit, vbit(c,1,iv), vbit(c,1,iv+1)) for iv=1:2:nbath(c)) |> add!
+        end
         for ir=1:c.depth
             chain(nbit, pswap(nbit,iv,iv%c.nv+1) for iv=1:c.nv) |> add!
         end

@@ -120,7 +120,7 @@ end
     @test mres.nbatch == 100
     @test mres.nx == nspins(model)
     @test mres.nm == 1
-    #@test isapprox(energy(qmps, model), -0.75*8, atol=0.1)
+    @test isapprox(energy(qmps, model), -0.75*8, atol=0.1)
     @test collect_blocks(I2Gate, qmps.runtime.circuit) |> length == 16
 end
 
