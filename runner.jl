@@ -33,7 +33,7 @@ end
 @main function gradients(nx::Int=4, ny::Int=4;
                     depth::Int=5, nv::Int=1,
                     nbatch::Int=1024, maxiter::Int=20,
-                    J2::Float64=0.5,
+                    J2::Float64=0.5, fix_params::Bool=false,
                     periodic::Bool=false)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
@@ -44,13 +44,16 @@ end
     nparams = nparameters(qpeps.runtime.circuit)
     println("Number of parameters is $nparams")
     gradients = zeros(Float64, nparams, maxiter)
+    dispatch!(qpeps.runtime.circuit, :random)
     for i=1:maxiter
         println("Iteration $i")
         flush(stdout)
-        dispatch!(qpeps.runtime.circuit, :random)
+        if !fix_params
+            dispatch!(qpeps.runtime.circuit, :random)
+        end
         gradients[:,i] = get_gradients(qpeps, model)
     end
-    writedlm("data/gradients-nx$nx-ny$ny-nv$nv-d$depth-B$nbatch-iter$maxiter.dat", gradients)
+    writedlm("data/$(fix_params ? "fixparam-gradients" : "gradients")-nx$nx-ny$ny-nv$nv-d$depth-B$nbatch-iter$maxiter.dat", gradients)
 end
 
 @main function show_exact(nx=4, ny=4)
