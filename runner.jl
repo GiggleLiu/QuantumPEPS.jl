@@ -13,7 +13,7 @@ using Fire
 using Yao, Yao.ConstGate, BitBasis
 using QuantumPEPS
 using Flux
-using BenchmarkTools
+using BenchmarkTools, Random
 
 include("data/decoder.jl")
 
@@ -22,6 +22,7 @@ include("data/decoder.jl")
                     nbatch::Int=1024, maxiter::Int=200,
                     J2::Float64=0.5, lr::Float64=0.1,
                     periodic::Bool=false)
+    Random.seed!(2)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
     optimizer = Flux.Optimise.ADAM(lr)
@@ -35,6 +36,7 @@ end
                     nbatch::Int=1024, maxiter::Int=200,
                     J2::Float64=0.5, lr::Float64=0.1,
                     periodic::Bool=false)
+    Random.seed!(2)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
     config = QMPSConfig(nv, nx*ny-nv+1, depth)
     optimizer = Flux.Optimise.ADAM(lr)
