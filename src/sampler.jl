@@ -15,13 +15,13 @@ function chbasis!(rt::QPEPSRunTime, basis)
     return rt
 end
 
-struct QPEPSMachine
-    config::QPEPSConfig
+struct QPEPSMachine{CT<:AbstractQPEPSConfig}
+    config::CT
     runtime::QPEPSRunTime
     reg0::AbstractRegister
 end
 
-function QPEPSMachine(config::QPEPSConfig, reg0::AbstractRegister)
+function QPEPSMachine(config::AbstractQPEPSConfig, reg0::AbstractRegister)
     c = get_circuit(config)
     rt = QPEPSRunTime(c, collect_blocks(RotationGate, c), collect_blocks(Bag, c), collect_blocks(Measure, c))
     QPEPSMachine(config, rt, reg0)
@@ -46,7 +46,7 @@ generate samples
 """
 function gensample(qpeps::QPEPSMachine, basis)
     c, rt = qpeps.config, qpeps.runtime
-    nx = c.nrepeat+c.nv
+    nx = c.nrepeat+nbath(c)
     chbasis!(rt, basis)
     copy(qpeps.reg0) |> rt.circuit
     res = zeros(Int, nbatch(qpeps.reg0), nx)
@@ -54,5 +54,5 @@ function gensample(qpeps::QPEPSMachine, basis)
     for j=1:nx
         res[:,j] = Vector(rt.mblocks[j].results)
     end
-    return MeasureResult(c.nm, res)
+    return MeasureResult(nm(c), res)
 end

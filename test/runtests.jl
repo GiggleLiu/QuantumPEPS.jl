@@ -100,6 +100,30 @@ end
     @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 6
 end
 
+@testset "qmps machine" begin
+    Random.seed!(3)
+    c = QMPSConfig(5, 12, 3)
+    qmps = QPEPSMachine(c, zero_state(6; nbatch=100))
+    rt = qmps.runtime
+    @test length(rt.rotblocks) == 180
+    @test length(rt.mblocks) == 16
+    @test length(rt.mbasis) == 16
+
+    @test collect_blocks(I2Gate, qmps.runtime.circuit) |> length == 16
+    chbasis!(qmps.runtime, Y)
+    @test collect_blocks(RotationGate{<:Any,<:Any,<:XGate}, qmps.runtime.circuit) |> length == 16
+    @test collect_blocks(I2Gate, qmps.runtime.circuit) |> length == 0
+
+    model = J1J2(4, 4; J2=0.5, periodic=false)
+    @test nspins(qmps.config) == nspins(model)
+    mres = gensample(qmps, Z)
+    @test mres.nbatch == 100
+    @test mres.nx == nspins(model)
+    @test mres.nm == 1
+    #@test isapprox(energy(qmps, model), -0.75*8, atol=0.1)
+    @test collect_blocks(I2Gate, qmps.runtime.circuit) |> length == 16
+end
+
 @testset "j1j2" begin
     j1j2 = J1J2(4; periodic=false, J2=0.5)
     @test get_bonds(j1j2) == [(1, 2, 1.0),(2, 3, 1.0), (3, 4, 1.0), (1,3, 0.5), (2,4, 0.5)]

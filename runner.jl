@@ -30,6 +30,19 @@ include("data/decoder.jl")
     save_training("data/j1j2-nx$nx-ny$ny-nv$nv-d$depth.jld2", optimizer, history, params)
 end
 
+@main function j1j2mps(nx::Int=4, ny::Int=4;
+                    depth::Int=3, nv::Int=5,
+                    nbatch::Int=1024, maxiter::Int=200,
+                    J2::Float64=0.5, lr::Float64=0.1,
+                    periodic::Bool=false)
+    model = J1J2(nx, ny; J2=J2, periodic=periodic)
+    config = QMPSConfig(nv, nx*ny-nv+1, depth)
+    optimizer = Flux.Optimise.ADAM(lr)
+    qpeps, history = train(config, model; maxiter=maxiter, nbatch=nbatch, optimizer=optimizer, use_cuda=USE_CUDA)
+    params = parameters(qpeps.runtime.circuit)
+    save_training("data/j1j2-nx$nx-ny$ny-nv$nv-d$depth.jld2", optimizer, history, params)
+end
+
 @main function gradients(nx::Int=4, ny::Int=4;
                     depth::Int=5, nv::Int=1,
                     nbatch::Int=1024, maxiter::Int=20,
