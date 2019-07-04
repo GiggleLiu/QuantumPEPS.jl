@@ -4,15 +4,15 @@ from viznet import parsecircuit as _
 from theme import *
 from plotlib import *
 
-def singlet(handler, isodd, with_x=True):
-    if isodd:
-        handler.gate((basic, basic), (1, 0), ("S", "S"))
-    else:
-        handler.gate((_.CROSS, _.CROSS), (1, 0))
-    
-
 def singlet_easy(handler, i,j):
     handler.gate((basic, basic), (i, j), ("S", "S"))
+
+def singlet(handler, i,j):
+    handler.gate(_.GATE, i, 'X')
+    handler.x += 0.7
+    handler.gate(_.GATE, i, 'H')
+    handler.x += 0.5
+    handler.gate((_.NC, _.NOT), (i, j))
         
 def swap(handler, i,j):
     A, B = handler.gate((_.CROSS, _.CROSS), (i, j))
@@ -55,13 +55,13 @@ class PLT(object):
             
             for k in range(Ng):
                 for i in range(0,Ny,2):
-                    singlet_easy(handler, i*Ng+k,i*Ng+Ng+k)
+                    singlet(handler, i*Ng+k,i*Ng+Ng+k)
                 handler.x+=0.3
                     
             for i in range(Nx-Nv):
                 if i!=0:
                     for j in range(0,Ny,2):
-                        singlet_easy(handler, j*Ng,j*Ng+Ng)
+                        singlet(handler, j*Ng,j*Ng+Ng)
                     handler.x+=0.3
  
                 handler.x+=0.2
@@ -108,15 +108,19 @@ class PLT(object):
             handler.x += 0.8
             
             for k in range(Ng):
+                x0 = handler.x
                 for i in range(0,Ny,2):
-                    singlet_easy(handler, i*Ng+k,i*Ng+Ng+k)
-                handler.x+=0.3
+                    singlet(handler, i*Ng+k,i*Ng+Ng+k)
+                    handler.x=x0
+                handler.x+=1.8
                     
             for i in range(Nx-Nv):
                 if i!=0:
+                    x0 = handler.x
                     for j in range(0,Ny,2):
-                        singlet_easy(handler, j*Ng,j*Ng+Ng)
-                    handler.x+=0.3
+                        singlet(handler, j*Ng,j*Ng+Ng)
+                        handler.x=x0
+                    handler.x+=1.3
  
                 handler.x+=0.5
                 if i==0:
@@ -157,6 +161,6 @@ class PLT(object):
             for i in range(num_bit):
                 measure(handler, i, basis)
 
-            box >> (slice(5.5,16.5), slice(-5,-1.5))
+            box >> (slice(8.5,21.5), slice(-5,-1.5))
            
 fire.Fire(PLT())
