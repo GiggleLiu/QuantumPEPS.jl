@@ -3,7 +3,7 @@ const USE_CUDA = true
 
 if USE_CUDA
     using CUDAnative: device!, CuDevice
-    device!(CuDevice(0))   # change the device number here!
+    device!(CuDevice(6))   # change the device number here!
     using CuArrays
     CuArrays.allowscalar(false)
     using CuYao
@@ -48,27 +48,35 @@ end
 @main function gradients(nx::Int=4, ny::Int=4;
                     depth::Int=5, nv::Int=1,
                     nbatch::Int=1024, maxiter::Int=20,
-                    J2::Float64=0.5, fix_params::Bool=false,
-                    periodic::Bool=false)
+                    J2::Float64=0.5,
+                    periodic::Bool=false, use_mps::Bool=false)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
-    config = QPEPSConfig(ny, nv, nx-nv, depth)
+    if use_mps
+        config = QMPSConfig(nv, nx*ny-nv+1, depth)
+    else
+        config = QPEPSConfig(ny, nv, nx-nv, depth)
+    end
+    Random.seed!(2)
     reg0 = zero_state(nqubits(config); nbatch=nbatch)
 
     USE_CUDA && (reg0 = reg0 |> cu)
     qpeps = QPEPSMachine(config, reg0)
     nparams = nparameters(qpeps.runtime.circuit)
     println("Number of parameters is $nparams")
-    gradients = zeros(Float64, nparams, maxiter)
-    dispatch!(qpeps.runtime.circuit, :random)
-    for i=1:maxiter
-        println("Iteration $i")
-        flush(stdout)
-        if !fix_params
-            dispatch!(qpeps.runtime.circuit, :random)
+
+    for fix_params in [true, false]
+        gradients = zeros(Float64, nparams, maxiter)
+        dispatch!(qpeps.runtime.circuit, :random)
+        for i=1:maxiter
+            println("Iteration $i")
+            flush(stdout)
+            if !fix_params
+                dispatch!(qpeps.runtime.circuit, :random)
+            end
+            gradients[:,i] = get_gradients(qpeps, model)
         end
-        gradients[:,i] = get_gradients(qpeps, model)
+        writedlm("data/$(fix_params ? "fixparam-gradients" : "gradients")-nx$nx-ny$ny-nv$nv-d$depth-B$nbatch-iter$maxiter$(use_mps ? "mps" : "").dat", gradients)
     end
-    writedlm("data/$(fix_params ? "fixparam-gradients" : "gradients")-nx$nx-ny$ny-nv$nv-d$depth-B$nbatch-iter$maxiter.dat", gradients)
 end
 
 @main function show_exact(nx=4, ny=4)
