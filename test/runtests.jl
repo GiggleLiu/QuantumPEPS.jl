@@ -2,7 +2,7 @@ using Test, QuantumPEPS, Yao
 using LinearAlgebra, Random
 
 @testset "pswap gate" begin
-    pb = pswap(6, 2, 4)
+    pb = QuantumPEPS.pswap(6, 2, 4)
     reg = rand_state(6)
     @test copy(reg) |> pb ≈ invoke(apply!, Tuple{ArrayReg, PutBlock}, copy(reg), pb)
     @test copy(reg) |> pb ≈ reg

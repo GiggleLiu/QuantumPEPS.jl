@@ -11,7 +11,7 @@ const heisenberg_term = repeat(2, X, 1:2) + repeat(2, Y, 1:2) + repeat(2, Z, 1:2
 
 function hamiltonian(model::AbstractHeisenberg)
     nbit = nspins(model)
-    Sum([x[3]*heisenberg_ij(nbit, x[1], x[2]) for x in get_bonds(model)]...)*0.25
+    sum([x[3]*heisenberg_ij(nbit, x[1], x[2]) for x in get_bonds(model)])*0.25
 end
 
 function get_bonds(model::Heisenberg{2})
