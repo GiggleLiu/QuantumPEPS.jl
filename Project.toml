@@ -1,7 +1,7 @@
 name = "QuantumPEPS"
 uuid = "72caed22-9a17-11e9-1079-d5f6f8824925"
 authors = ["JinGuo Liu"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 BitBasis = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
@@ -15,6 +15,7 @@ YaoBlocks = "418bc28f-b43b-5e0b-a6e7-61bbc1a2c1df"
 
 [compat]
 julia = "1"
+Yao = "~0.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -3,7 +3,7 @@ const USE_CUDA = true
 
 if USE_CUDA
     using CUDAnative: device!, CuDevice
-    device!(CuDevice(6))   # change the device number here!
+    device!(CuDevice(0))   # change the device number here!
     using CuArrays
     CuArrays.allowscalar(false)
     using CuYao

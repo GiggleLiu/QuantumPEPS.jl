@@ -35,7 +35,8 @@ def measure(handler, i, basis):
     return handler.gate(sq, i, basis)
     
 def measure_reset(handler, i, basis):
-    return handler.gate(sqr, i, basis)
+    g = handler.gate(sq, i, r'$\circlearrowleft$')
+    return g
 
 class PLT(object):
     def j1j2(self, tp="png"):
@@ -92,7 +93,7 @@ class PLT(object):
                 measure(handler, i, basis)
 
     def j1j244(self, tp="png"):
-        basis=r"$\alpha$"
+        basis=r""
         Ny = 4
         Nv = 1
         Ng = Nv+1

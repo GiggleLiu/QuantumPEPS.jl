@@ -35,15 +35,15 @@ end
 
     reg = repeat(ArrayReg([0im,1]/sqrt(2)), 10)
     reg |> basis_rotor(Z) |> mblock
-    @test mblock.results ≈ fill(1,10)
+    @test mblock.results == fill(1,10)
 
     reg = repeat(ArrayReg([1+0im,1]/sqrt(2)), 10)
     reg |> basis_rotor(X) |> mblock
-    @test mblock.results ≈ fill(0,10)
+    @test mblock.results == fill(0,10)
 
     reg = repeat(ArrayReg([im,1.0]/sqrt(2)), 10)
     reg |> basis_rotor(Y) |> mblock
-    @test mblock.results ≈ fill(1,10)
+    @test mblock.results == fill(1,10)
 end
 
 @testset "QPEPSConfig" begin

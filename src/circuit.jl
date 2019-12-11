@@ -61,12 +61,12 @@ function get_circuit(c::QPEPSConfig)
         # measure physical qubits
         locs = (mbit(c)...,)
         Bag(basis_rotor(Z, nbit, locs)) |> add!
-        Measure(nbit; locs=locs, collapseto=0) |> add!
+        Measure(nbit; locs=locs, resetto=0) |> add!
         if i==c.nrepeat
             for iv=1:c.nv
                 locs = map(ibit->c.nm+c.nv*(ibit-1)+iv, (1:c.nm...,))
                 Bag(basis_rotor(Z, nbit, locs)) |> add!
-                Measure(nbit; locs=locs, collapseto = 0) |> add!
+                Measure(nbit; locs=locs, resetto = 0) |> add!
             end
         end
     end
@@ -97,11 +97,11 @@ function get_circuit(c::QMPSConfig)
         # measure physical qubits
         locs = (1,)
         Bag(basis_rotor(Z, nbit, locs)) |> add!
-        Measure(nbit; locs=locs, collapseto=0) |> add!
+        Measure(nbit; locs=locs, resetto=0) |> add!
         if i==c.nrepeat
             for iv=1:nbath(c)
                 Bag(basis_rotor(Z, nbit, (1+iv,))) |> add!
-                Measure(nbit; locs=(1+iv,), collapseto = 0) |> add!
+                Measure(nbit; locs=(1+iv,), resetto = 0) |> add!
             end
         end
     end
