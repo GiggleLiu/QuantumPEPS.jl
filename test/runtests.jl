@@ -48,7 +48,7 @@ end
 end
 
 @testset "QPEPSConfig" begin
-    c = QPEPSConfig(4, 2, 4, 1)
+    c = QPEPSConfig(; nmeasure=4, nvirtual=2, nrepeat=4, depth=1)
     @test nqubits(c) == 12
     @test mbit(c, 3) == 3
     @test vbit(c, 4) == 11:12
@@ -63,7 +63,7 @@ end
     mr = MeasureResult(4, [1 2 3; 4 5 6])
     @test mr.nx == 3
     @test mr.nbatch == 2
-    @test mr.nm == 4
+    @test mr.nmeasure == 4
     @test mr[1, 1] == [1, 0]
     @test mr[1, 2] == [0, 0]
     @test mr[1, 3] == [0, 1]
@@ -78,8 +78,8 @@ end
 end
 
 @testset "qpeps machine" begin
-    Random.seed!(3)
-    c = QPEPSConfig(4, 2, 4, 1)
+    Random.seed!(2)
+    c = QPEPSConfig(; nmeasure=4, nvirtual=2, nrepeat=4, depth=1)
     qpeps = QPEPSMachine(c, zero_state(12; nbatch=100))
     rt = qpeps.runtime
     @test length(rt.rotblocks) == 4*20
@@ -96,14 +96,14 @@ end
     mres = gensample(qpeps, Z)
     @test mres.nbatch == 100
     @test mres.nx == model.size[1]
-    @test mres.nm == model.size[2]
+    @test mres.nmeasure == model.size[2]
     @test isapprox(energy(qpeps, model), -0.75*12, atol=0.1)
     @test collect_blocks(I2Gate, qpeps.runtime.circuit) |> length == 6
 end
 
 @testset "qmps machine" begin
     Random.seed!(3)
-    c = QMPSConfig(5, 12, 3)
+    c = QMPSConfig(; nvirtual=5, nrepeat=12, depth=3)
     qmps = QPEPSMachine(c, zero_state(6; nbatch=100))
     rt = qmps.runtime
     @test length(rt.rotblocks) == 180
@@ -120,8 +120,8 @@ end
     mres = gensample(qmps, Z)
     @test mres.nbatch == 100
     @test mres.nx == nspins(model)
-    @test mres.nm == 1
-    @test isapprox(energy(qmps, model), -0.75*8, atol=0.1)
+    @test mres.nmeasure == 1
+    @test isapprox(energy(qmps, model), -0.75*8, atol=0.2)
     @test collect_blocks(I2Gate, qmps.runtime.circuit) |> length == 16
 end
 
@@ -151,18 +151,20 @@ end
 end
 
 @testset "system test" begin
+    Random.seed!(2)
     nx=4
-    ny=4
+    ny=3
     depth=1
-    nv=5
-    nbatch=1024
-    maxiter=200
+    nvirtual=3
+    nbatch=200
+    maxiter=50
     J2=0.5
     lr=0.1
     periodic=false
 
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
-    config = QMPSConfig(nv, nx*ny-nv+1, depth)
+    config = QMPSConfig(; nrepeat=nx*ny-nvirtual+1, nvirtual, depth)
     optimizer = Optimisers.ADAM(lr)
     qpeps, history = train(config, model; maxiter=maxiter, nbatch=nbatch, optimizer=optimizer, use_cuda=false)
+    @test history[1] > history[end]
 end

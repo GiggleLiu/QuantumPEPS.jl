@@ -1,1 +1,1 @@
-using CuYao: cu
+using .CuYao: cu

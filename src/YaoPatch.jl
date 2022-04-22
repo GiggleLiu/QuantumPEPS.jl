@@ -1,8 +1,4 @@
-export pswap, singlet_block, basis_rotor
-using YaoBlocks
-using YaoArrayRegister: mulrow!, u1rows!
-
-function Yao.apply!(reg::ArrayReg, pb::PutBlock{N,2,RotationGate{2,T,G}}) where {N,T,G<:SWAPGate}
+function Yao.apply!(reg::ArrayReg, pb::PutBlock{D,2,RotationGate{2,T,G}}) where {D,T,G<:SWAPGate}
     mask1 = bmask(pb.locs[1])
     mask2 = bmask(pb.locs[2])
     mask12 = mask1|mask2
@@ -24,13 +20,13 @@ function Yao.apply!(reg::ArrayReg, pb::PutBlock{N,2,RotationGate{2,T,G}}) where 
     return reg
 end
 
-mutable struct Bag{N}<:TagBlock{AbstractBlock, N}
-    content::AbstractBlock{N}
+mutable struct Bag{D}<:TagBlock{AbstractBlock, D}
+    content::AbstractBlock{D}
 end
 
 Yao.content(bag) = bag.content
 Yao.chcontent(bag::Bag, content) = Bag(content)
-Yao.mat(bag::Bag) = mat(bag.content)
+Yao.mat(::Type{T}, bag::Bag) where T = mat(T, bag.content)
 Yao.apply!(reg::AbstractRegister, bag::Bag) = apply!(reg, bag.content)
 YaoBlocks.PreserveStyle(::Bag) = YaoBlocks.PreserveAll()
 setcontent!(bag::Bag, content) = (bag.content = content; bag)

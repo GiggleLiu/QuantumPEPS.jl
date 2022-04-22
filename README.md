@@ -31,10 +31,18 @@ Note: please turn of the CUDA swith in `runner.jl` if `CuYao` is not installed.
 
 ## To Cite
 ```bibtex
-@article{Liu2019,
-    title={Variational Quantum Eigensolver with Fewer Qubits},
-    author={Liu, Jin-Guo and Zhang, Yi-Hong and Wan, Yuan and Wang, Lei},
-    eprint={arXiv:1902.02663},
-    url={https://arxiv.org/abs/1902.02663}
+@article{Liu_2019,
+	doi = {10.1103/physrevresearch.1.023025},
+	url = {https://doi.org/10.1103%2Fphysrevresearch.1.023025},
+	year = 2019,
+	month = {sep},
+	publisher = {American Physical Society ({APS})},
+	volume = {1},
+	number = {2},
+	author = {Jin-Guo Liu and Yi-Hong Zhang and Yuan Wan and Lei Wang},
+	title = {Variational quantum eigensolver with fewer qubits},
+	journal = {Physical Review Research}
 }
 ```
+
+[Download paper](https://journals.aps.org/prresearch/pdf/10.1103/PhysRevResearch.1.023025)

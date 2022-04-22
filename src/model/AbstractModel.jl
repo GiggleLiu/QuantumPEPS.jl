@@ -1,6 +1,3 @@
-export AbstractModel, Heisenberg
-export heisenberg_ij, hamiltonian, heisenberg_term, ground_state, energy, energy_exact, get_bonds, energy, heisenberg_2d, nspins
-
 abstract type AbstractModel{D} end
 abstract type AbstractHeisenberg{D} <: AbstractModel{D} end
 

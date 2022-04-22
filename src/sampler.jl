@@ -1,6 +1,3 @@
-export MeasureResult, gensample, QPEPSRunTime, QPEPSMachine
-export chbasis!
-
 struct QPEPSRunTime
     circuit
     rotblocks
@@ -28,18 +25,18 @@ function QPEPSMachine(config::AbstractQPEPSConfig, reg0::AbstractRegister)
 end
 
 struct MeasureResult{AT<:AbstractMatrix}
-    nm::Int
+    nmeasure::Int
     nbatch::Int
     nx::Int
     data::AT
 end
-MeasureResult(nm::Int, data::AbstractMatrix) = MeasureResult(nm, size(data)..., data)
+MeasureResult(nmeasure::Int, data::AbstractMatrix) = MeasureResult(nmeasure, size(data)..., data)
 
 Base.getindex(m::MeasureResult, i::Int,j::Int) = readbit.(view(m.data,:,i), j)
 Base.getindex(m::MeasureResult, ij) = getindex(m, (ij-1)%m.nx+1, (ij-1)÷m.nx+1)
 Base.getindex(m::MeasureResult, ci::CartesianIndex) = getindex(m, ci.I...)
-Base.size(m::MeasureResult) = (m.nx, m.nm)
-Base.size(m::MeasureResult,i::Int) = i==1 ? m.nx : m.nm
+Base.size(m::MeasureResult) = (m.nx, m.nmeasure)
+Base.size(m::MeasureResult,i::Int) = i==1 ? m.nx : m.nmeasure
 
 """
 generate samples
@@ -54,5 +51,5 @@ function gensample(qpeps::QPEPSMachine, basis)
     for j=1:nx
         res[:,j] = Vector(rt.mblocks[j].results)
     end
-    return MeasureResult(nm(c), res)
+    return MeasureResult(nmeasure(c), res)
 end

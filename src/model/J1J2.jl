@@ -1,5 +1,3 @@
-export J1J2
-
 """
     J1J2{D} <: AbstractHeisenberg{D}
 

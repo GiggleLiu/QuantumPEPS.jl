@@ -12,10 +12,10 @@ using BenchmarkTools
 using Profile
 
 function run_profile(nx=6, ny=6; usecuda)
-    nv = 1
+    nvirtual = 1
     depth = 2
     model = J1J2(nx, ny; J2=0.5, periodic=false)
-    config = QPEPSConfig(ny, nv, nx-nv, depth)
+    config = QPEPSConfig(; nmeasure=ny, nrepeat=nx-nvirtual, nvirtual, depth)
 
     reg0 = zero_state(nqubits(config); nbatch=1024)
     usecuda && (reg0 = reg0 |> cu)
