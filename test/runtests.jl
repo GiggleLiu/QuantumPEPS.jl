@@ -168,3 +168,7 @@ end
     qpeps, history = train(config, model; maxiter=maxiter, nbatch=nbatch, optimizer=optimizer, use_cuda=false)
     @test history[1] > history[end]
 end
+
+@testset "demo" begin
+    include("demo.jl")
+end

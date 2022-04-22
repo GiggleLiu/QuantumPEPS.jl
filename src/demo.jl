@@ -1,8 +1,8 @@
-@cast module Demo
+module Demo
 using Yao, Yao.BitBasis
-using Optimisers, Comonicon
+using Optimisers
 using Random
-using DelimitedFiles, FileIO
+using DelimitedFiles, JLD2
 using ..QuantumPEPS
 using CuYao: cu
 
@@ -10,6 +10,31 @@ function save_training(filename, qopt, loss::Vector, params::Vector)
     save(filename, "qopt", qopt, "loss", loss, "params", params)
 end
 
+"""
+    j1j2peps(nx::Int=4, ny::Int=4; depth::Int=5, nvirtual::Int=1,
+                    nbatch::Int=1024, maxiter::Int=200,
+                    J2::Float64=0.5, lr::Float64=0.1,
+                    periodic::Bool=false, use_cuda::Bool=false, write::Bool=false)
+
+Faithful QPEPS traning for solving the J1-J2 hamiltonian ground state.
+Returns a triple of (optimizer, history, params).
+
+Positional Arguments
+--------------------------
+* `nx` and `ny` are the square lattice sizes.
+
+Keyword Arguments
+--------------------------
+* `depth` is the circuit depth, decides how many entangle layers between two measurements.
+* `nvirtual` is the number of virtual qubits.
+* `nbatch` is the batch size, or the number of shots.
+* `maxiter` is the number of optimization iterations.
+* `J2` is the strength of the second nearest neighbor coupling.
+* `lr` is the learning rate of the ADAM optimizer.
+* `periodic` specifies the boundary condition of the lattice.
+* `use_cuda` is true means uploading the code on GPU for faster computation.
+* `write` is true will write training results to the data folder.
+"""
 function j1j2peps(nx::Int=4, ny::Int=4;
                     depth::Int=5, nvirtual::Int=1,
                     nbatch::Int=1024, maxiter::Int=200,
@@ -21,12 +46,22 @@ function j1j2peps(nx::Int=4, ny::Int=4;
     optimizer = Optimisers.ADAM(lr)
     qpeps, history = train(config, model; maxiter, nbatch, optimizer, use_cuda)
     params = parameters(qpeps.runtime.circuit)
-    write && save_training(QuantumPEPS.project_relative_path("data", "j1j2-nx$nx-ny$ny-nv$nvirtual-d$depth.jld2", optimizer, history, params))
+    write && save_training(QuantumPEPS.project_relative_path("data", "j1j2-nx$nx-ny$ny-nv$nvirtual-d$depth.jld2"), optimizer, history, params)
     return optimizer, history, params
 end
 
-function j1j2mps(nx::Int=4, ny::Int=4;
-                    depth::Int=3, nvirtual::Int=5,
+"""
+    j1j2mps(nx::Int=4, ny::Int=4; depth::Int=3, nvirtual::Int=5,
+                    nbatch::Int=1024, maxiter::Int=200,
+                    J2::Float64=0.5, lr::Float64=0.1,
+                    periodic::Bool=false, use_cuda::Bool=false, write::Bool=false)
+
+Faithful QMPS traning for solving the J1-J2 hamiltonian ground state.
+Returns a triple of (optimizer, history, params).
+
+The parameters are the same as those for `j1j2peps`.
+"""
+function j1j2mps(nx::Int=4, ny::Int=4; depth::Int=3, nvirtual::Int=5,
                     nbatch::Int=1024, maxiter::Int=200,
                     J2::Float64=0.5, lr::Float64=0.1,
                     periodic::Bool=false, use_cuda::Bool=false, write::Bool=false)
@@ -36,7 +71,7 @@ function j1j2mps(nx::Int=4, ny::Int=4;
     optimizer = Optimisers.ADAM(lr)
     qpeps, history = train(config, model; maxiter, nbatch, optimizer, use_cuda)
     params = parameters(qpeps.runtime.circuit)
-    write && save_training(QuantumPEPS.project_relative_path("data", "j1j2-nx$nx-ny$ny-nv$nvirtual-d$depth.jld2", optimizer, history, params))
+    write && save_training(QuantumPEPS.project_relative_path("data", "j1j2-nx$nx-ny$ny-nv$nvirtual-d$depth.jld2"), optimizer, history, params)
     return optimizer, history, params
 end
 
@@ -45,7 +80,7 @@ function gradients(nx::Int=4, ny::Int=4;
                     nbatch::Int=1024, maxiter::Int=20,
                     J2::Float64=0.5,
                     periodic::Bool=false, use_mps::Bool=false,
-                    use_cuda::Bool=false, write::Bool=false)
+                    use_cuda::Bool=false, write::Bool=false, fix_params::Bool=false)
     model = J1J2(nx, ny; J2, periodic)
     if use_mps
         config = QMPSConfig(; nvirtual, depth, nrepeat=nx*ny-nvirtual+1)
@@ -60,20 +95,17 @@ function gradients(nx::Int=4, ny::Int=4;
     nparams = nparameters(qpeps.runtime.circuit)
     @info "Number of parameters is $nparams"
 
-    GG  []
-    for fix_params in [true, false]
-        gradients = zeros(Float64, nparams, maxiter)
-        dispatch!(qpeps.runtime.circuit, :random)
-        for i=1:maxiter
-            @info "Iteration $i"
-            flush(stdout)
-            if !fix_params
-                dispatch!(qpeps.runtime.circuit, :random)
-            end
-            gradients[:,i] = get_gradients(qpeps, model)
+    gradients = zeros(Float64, nparams, maxiter)
+    dispatch!(qpeps.runtime.circuit, :random)
+    for i=1:maxiter
+        @info "Iteration $i"
+        flush(stdout)
+        if !fix_params
+            dispatch!(qpeps.runtime.circuit, :random)
         end
-        write && writedlm(QuantumPEPS.project_relative_path("data", "$(fix_params ? "fixparam-gradients" : "gradients")-nx$nx-ny$ny-nv$nvirtual-d$depth-B$nbatch-iter$maxiter$(use_mps ? "mps" : "").dat", gradients))
+        gradients[:,i] = get_gradients(qpeps, model)
     end
+    write && writedlm(QuantumPEPS.project_relative_path("data", "$(fix_params ? "fixparam-gradients" : "gradients")-nx$nx-ny$ny-nv$nvirtual-d$depth-B$nbatch-iter$maxiter$(use_mps ? "mps" : "").dat", gradients))
     return gradients
 end
 
@@ -99,6 +131,4 @@ function run_benchmark(nx::Int, ny::Int; usecuda::Bool=false, nrun::Int=10, nvir
         energy(qpeps, model)
     end
 end
-
-@main
 end

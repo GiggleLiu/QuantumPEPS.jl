@@ -17,7 +17,7 @@ function train(config, model; maxiter=200, optimizer=Optimisers.ADAM(0.1), nbatc
     circuit = qpeps.runtime.circuit
     rotblocks = qpeps.runtime.rotblocks
     dispatch!(circuit, :random)
-    println("E0 = $(energy(qpeps, model))")
+    @info "E0 = $(energy(qpeps, model))"
     flush(stdout)
 
     history = Float64[]
