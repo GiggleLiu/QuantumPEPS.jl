@@ -1,5 +1,7 @@
 # PEPS inspired quantum circuit ansatz
 
+[![CI](https://github.com/GiggleLiu/QuantumPEPS.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/GiggleLiu/QuantumPEPS.jl/actions/workflows/ci.yml)
+
 To make life easier, [here](https://giggleliu.github.io/TwoQubit-VQE.html) is a simplified notebook version of MPS inspired qubit saving scheme for VQE. For a PEPS inpired ansatz solving the J1-J2 square lattice model, please checkout the following content.
 
 ![](docs/images/j1j2chain44.png)
