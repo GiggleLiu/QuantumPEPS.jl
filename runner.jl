@@ -12,7 +12,7 @@ end
 using Fire
 using Yao, Yao.ConstGate, BitBasis
 using QuantumPEPS
-using Flux
+using Optimisers
 using BenchmarkTools, Random
 
 include("data/decoder.jl")
@@ -25,7 +25,7 @@ include("data/decoder.jl")
     Random.seed!(2)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
     config = QPEPSConfig(ny, nv, nx-nv, depth)
-    optimizer = Flux.Optimise.ADAM(lr)
+    optimizer = Optimisers.ADAM(lr)
     qpeps, history = train(config, model; maxiter=maxiter, nbatch=nbatch, optimizer=optimizer, use_cuda=USE_CUDA)
     params = parameters(qpeps.runtime.circuit)
     save_training("data/j1j2-nx$nx-ny$ny-nv$nv-d$depth.jld2", optimizer, history, params)
@@ -39,7 +39,7 @@ end
     Random.seed!(2)
     model = J1J2(nx, ny; J2=J2, periodic=periodic)
     config = QMPSConfig(nv, nx*ny-nv+1, depth)
-    optimizer = Flux.Optimise.ADAM(lr)
+    optimizer = Optimisers.ADAM(lr)
     qpeps, history = train(config, model; maxiter=maxiter, nbatch=nbatch, optimizer=optimizer, use_cuda=USE_CUDA)
     params = parameters(qpeps.runtime.circuit)
     save_training("data/j1j2-nx$nx-ny$ny-nv$nv-d$depth.jld2", optimizer, history, params)

@@ -1,5 +1,5 @@
 export energy, train, get_gradients
-using Flux: Optimise
+using Optimisers
 
 function get_gradients(qpeps::QPEPSMachine, model)
     return map(qpeps.runtime.rotblocks) do r
@@ -12,7 +12,7 @@ function get_gradients(qpeps::QPEPSMachine, model)
     end
 end
 
-function train(config, model; maxiter=200, optimizer=Optimise.ADAM(0.1), nbatch=1024, use_cuda=true)
+function train(config, model; maxiter=200, optimizer=Optimisers.ADAM(0.1), nbatch=1024, use_cuda=true)
     @assert nspins(config) == nspins(model)
     #@assert config.nv+config.nrepeat == model.size[1]
     reg0 = zero_state(nqubits(config); nbatch=nbatch)
@@ -29,7 +29,7 @@ function train(config, model; maxiter=200, optimizer=Optimise.ADAM(0.1), nbatch=
     println("Number of parameters is $(length(params))")
     for i in 1:maxiter
         grad = get_gradients(qpeps, model)
-        Optimise.update!(optimizer, params, grad)
+        Optimisers.update!(optimizer, params, grad)
         dispatch!.(rotblocks, params)
         push!(history, energy(qpeps, model))
         println("Iter $i, E = $(history[end])")

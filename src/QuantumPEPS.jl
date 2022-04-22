@@ -4,7 +4,7 @@ using Statistics
 using Yao.ConstGate
 using KrylovKit: eigsolve
 using Requires
-using Flux
+using Optimisers
 
 include("YaoPatch.jl")
 include("circuit.jl")

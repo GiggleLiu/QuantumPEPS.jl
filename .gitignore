@@ -17,3 +17,5 @@ _local/
 data/_*.dat
 data/_*.jld2
 __pycache__/
+
+Manifest.toml
