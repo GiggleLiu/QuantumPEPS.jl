@@ -7,7 +7,12 @@ using Printf
 #using Flux
 #using BenchmarkTools
 
-include("data/decoder.jl")
+#function decode(nx::Int, ny::Int, depth::Int=5, nvirtual::Int=1)
+    #suff = QuantumPEPS.project_relative_path("data", "j1j2-nx$nx-ny$ny-nv$nvirtual-d$depth")
+    #res = load("$suff.jld2")
+    #writedlm("$suff-params.dat", res["params"])
+    #writedlm("$suff-loss.dat", res["loss"])
+#end
 
 @cast function show_exact(nx=4, ny=4)
     model = J1J2(nx, ny; J2=0.5, periodic=false)

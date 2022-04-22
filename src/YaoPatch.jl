@@ -27,7 +27,7 @@ end
 Yao.content(bag) = bag.content
 Yao.chcontent(bag::Bag, content) = Bag(content)
 Yao.mat(::Type{T}, bag::Bag) where T = mat(T, bag.content)
-Yao.apply!(reg::AbstractRegister, bag::Bag) = apply!(reg, bag.content)
+YaoBlocks._apply!(reg::AbstractRegister, bag::Bag) = apply!(reg, bag.content)
 YaoBlocks.PreserveStyle(::Bag) = YaoBlocks.PreserveAll()
 setcontent!(bag::Bag, content) = (bag.content = content; bag)
 

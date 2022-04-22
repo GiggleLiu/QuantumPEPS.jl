@@ -8,26 +8,18 @@ To make life easier, [here](https://giggleliu.github.io/TwoQubit-VQE.html) is a 
 
 Type `]` in a [Julia REPL](https://docs.julialang.org/en/v1/stdlib/REPL/index.html) to enter the `pkg` mode, then type
 ```julia pkg
-pkg> add Fire FileIO
-pkg> dev git@github.com:QuantumBFS/CuYao.jl.git
-pkg> dev git@github.com:GiggleLiu/QuantumPEPS.jl.git
+pkg> dev https://github.com/GiggleLiu/QuantumPEPS.jl.git
 ```
-`CuYao` is for [CUDA](https://en.wikipedia.org/wiki/CUDA) support, do not install it for a machine without CUDA support.
 
 ## To Run
 First, enter the directory `~/.julia/dev/QuantumPEPS/` (the default development directory of Julia) in a terminal.
 
-To run tests, type
+To run a toy example of J1-J2 model of size 4 x 4 with J2 = 0.5, type
 ```bash
-$ julia --project test/runtests.jl  # run the tests
-```
+julia> using QuantumPEPS
 
-To run a toy example of j1j2 model of size 4 x 4 with J2 = 0.5, type
-```bash
-$ julia --project runner.jl j1j2 4 4
+julia> Demo.j1j2peps(4, 4; use_cuda=true, )
 ```
-
-Note: please turn of the CUDA swith in `runner.jl` if `CuYao` is not installed.
 
 ## To Cite
 ```bibtex
