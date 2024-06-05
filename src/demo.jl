@@ -2,9 +2,9 @@ module Demo
 using Yao, Yao.BitBasis
 using Optimisers
 using Random
+using CUDA
 using DelimitedFiles, JLD2
 using ..QuantumPEPS
-using CuYao: cu
 
 function save_training(filename, qopt, loss::Vector, params::Vector)
     save(filename, "qopt", qopt, "loss", loss, "params", params)
