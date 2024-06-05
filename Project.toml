@@ -4,7 +4,7 @@ authors = ["JinGuo Liu"]
 version = "0.1.1"
 
 [deps]
-CuYao = "b48ca7a8-dd42-11e8-2b8e-1b7706800275"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
@@ -15,7 +15,6 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
 
 [compat]
-CuYao = "0.3"
 KrylovKit = "0.6"
 Optimisers = "0.3"
 Yao = "0.8"
