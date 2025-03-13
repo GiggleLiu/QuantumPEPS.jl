@@ -8,8 +8,8 @@ nspins(model::AbstractModel) = prod(size(model))
 
 Exact ground state energy.
 """
-function energy_exact(tc, model::AbstractModel)
-    nbit = nspins(tc)
+function energy_exact(tc, model::AbstractModel)  #tc is the target state
+    nbit = nspins(tc)   
     expect(hamiltonian(model), state_exact(tc)) |> real
 end
 

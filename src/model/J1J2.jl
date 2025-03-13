@@ -12,10 +12,10 @@ end
 
 Base.size(model::J1J2) = model.size
 
-@inline function get_site(ij, mn, pbc::Val{true})
+@inline function get_site(ij, mn, pbc::Val{true})  # ij: the index, mn: the size of the lattice
     Tuple(mod(i-1,m)+1 for (i,m) in zip(ij, mn))
 end
-
+ 
 @inline function get_site(ij, mn, pbc::Val{false})
     Tuple(i<=m ? i : 0 for (i,m) in zip(ij, mn))
 end
@@ -28,13 +28,13 @@ function get_bonds(model::J1J2{2})
         for (_i, _j) in [(i+1, j), (i, j+1)]
             sites = get_site((_i, _j), (m, n), Val(model.periodic))
             if all(sites .> 0)
-                push!(bonds, (cis[i,j], cis[sites...], 1.0))
+                push!(bonds, (cis[i,j], cis[sites...], 1.0))  # nearest neighbor interaction
             end
         end
         for (_i, _j) in [(i-1, j-1), (i-1, j+1)]
-            sites = get_site((_i, _j), (m, n), Val(model.periodic))
+            sites = get_site((_i, _j), (m, n), Val(model.periodic))  
             if all(sites .> 0)
-                push!(bonds, (cis[i,j], cis[sites...], model.J2))
+                push!(bonds, (cis[i,j], cis[sites...], model.J2))  # next-nearest neighbor interaction
             end
         end
     end

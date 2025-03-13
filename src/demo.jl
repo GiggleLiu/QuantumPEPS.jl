@@ -3,7 +3,7 @@ using Yao, Yao.BitBasis
 using Optimisers
 using Random
 using DelimitedFiles, JLD2
-using ..QuantumPEPS
+using ..QuantumPEPS  # .. means the parent directory
 using CuYao: cu
 
 function save_training(filename, qopt, loss::Vector, params::Vector)
@@ -123,7 +123,7 @@ function run_benchmark(nx::Int, ny::Int; usecuda::Bool=false, nrun::Int=10, nvir
     reg0 = zero_state(nqubits(config); nbatch=nbatch)
     transpose && (reg0 = transpose_storage(reg0))
     usecuda && (reg0 = reg0 |> cu)
-    qpeps = QPEPSMachine(config, reg0)
+    qpeps = QPEPSMachine(config, reg0) 
     dispatch!(qpeps.runtime.circuit, :random)
     energy(qpeps, model)
     @info "running $nrun times"

@@ -1,5 +1,5 @@
 function get_gradients(qpeps::QPEPSMachine, model)
-    return map(qpeps.runtime.rotblocks) do r
+    return map(qpeps.runtime.rotblocks) do r  # r is a rotblocks, for every r in rotblocks, we calculate the gradients.
         r.theta += π/2
         E₊ = energy(qpeps, model)
         r.theta -= π
@@ -16,9 +16,9 @@ function train(config, model; maxiter=200, optimizer=Optimisers.ADAM(0.1), nbatc
     qpeps = QPEPSMachine(config, reg0)
     circuit = qpeps.runtime.circuit
     rotblocks = qpeps.runtime.rotblocks
-    dispatch!(circuit, :random)
+    dispatch!(circuit, :random)  # random initialize the circuit Q: but initialize what parameters? gate or something else?
     @info "E0 = $(energy(qpeps, model))"
-    flush(stdout)
+    flush(stdout)  # pending output is immediately written to the standard output 
 
     history = Float64[]
     params = parameters(circuit)

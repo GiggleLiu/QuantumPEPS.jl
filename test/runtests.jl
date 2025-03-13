@@ -64,7 +64,7 @@ end
     @test mr.nx == 3
     @test mr.nbatch == 2
     @test mr.nmeasure == 4
-    @test mr[1, 1] == [1, 0]
+    @test mr[1, 1] == [1, 0]  # mr[i, j] calls the Base.getindex(mr, i, j) method.
     @test mr[1, 2] == [0, 0]
     @test mr[1, 3] == [0, 1]
     @test mr[1, 4] == [0, 0]
