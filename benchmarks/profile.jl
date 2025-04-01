@@ -1,11 +1,6 @@
-using CUDAnative: device!, CuDevice
-device!(CuDevice(5))
-using CuArrays
-CuArrays.allowscalar(false)
-
 # define the target model
 using Yao, Yao.ConstGate, BitBasis
-using CuYao
+using CUDA; CUDA.allowscalar(false)
 using YaoArrayRegister: u1rows!, mulrow!
 using QuantumPEPS
 using BenchmarkTools
